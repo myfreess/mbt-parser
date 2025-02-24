@@ -1,0 +1,60 @@
+{
+
+let pos_fname : Ref[String] = Ref::new("empty")
+let pos_lnum : Ref[Int] = Ref::new(1)
+let pos_bol : Ref[Int] = Ref::new(0)
+
+fn reset_lex(fname : String) -> Unit {
+  pos_fname.val = fname
+  pos_lnum.val = 1
+  pos_bol.val = 0
+}
+
+fn newline(pos : Int) -> Unit {
+  pos_lnum.val += 1
+  pos_bol.val = pos
+}
+
+fn newpos(pos : Int) -> Position {
+  { fname: pos_fname.val, lnum: pos_lnum.val, bol: pos_bol.val, cnum: pos }
+}
+
+}
+
+let ascii = ['\x00'-'\x7f'];
+let newline = '\n' | '\r' | "\r\n";
+let digit = ['0'-'9'];
+let qua_digit = ['0'-'3'];
+let oct_digit = ['0'-'7'];
+let hex_digit = ['0'-'9'] | ['a'-'f'] | ['A'-'F'];
+
+let lower = ['a' - 'z'];
+let upper = ['A' - 'Z'];
+
+let hexidecimal = '0' ['x' 'X'] (digit | ['a'-'f'] | ['A'-'F']) (digit | ['a'-'f'] | ['A'-'F'] | '_')*;
+
+let octal = '0' ['O' 'o'] ['0'-'7'] ['0'-'7' '_']*;
+let binary = '0' ['B' 'b'] ['0' '1'] ['0' '1' '_']*;
+let decimal = digit (digit | '_')*;
+
+let integer_literal = (decimal | hexidecimal | octal | binary) ("UL"? | "U"? | 'L'? | 'N'?);
+
+let float_dec = decimal '.' (digit | '_')* (['e' 'E'] ['+' '-']? decimal)?;
+let float_hex = hexidecimal '.' (hex_digit | '_')* (['p' 'P'] ['+' '-']? decimal)?;
+
+let float_literal = float_dec | float_hex;
+
+let identifier = (lower | upper | '_') (lower | upper | digit | '_')*;
+let whitespace = ['\t' ' '];
+
+
+
+rule token() -> (Token, Position, Position) {
+  parse {
+    eof as t => { (EOF, newpos($startpos(t)), newpos($endpos(t))) }
+  }
+}
+
+{
+
+}
